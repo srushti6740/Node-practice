@@ -1,0 +1,85 @@
+{
+   "INVALID_ACCESS_TOKEN": "Invalid access token!",
+   "UNAUTHORIZED": "Unauthorized access",
+   "FORBIDDEN": {
+      "ACCESS": "You do not have permission to access this resource"
+   },
+   "SERVER_ERROR_MESSAGE": "Internal Server Error.",
+   "SERVICE_UNAVAILABLE": "Service is under maintenance, please try again later",
+   "VALIDATIONS": {
+      "required": "%s is required",
+      "mustString": "%s must be string",
+      "mustNumber": "%s must be number",
+      "mustBoolean": "%s must be boolean value",
+      "invalid": "%s is not valid",
+      "invalidFormat": "%s format should be in %s"
+   },
+   "AUTH": {
+      "OTP": {
+         "VERIFIED": "OTP verified successfully"
+      },
+      "FORGOT_PASSWORD": {
+         "SUCCESS": "If this email is registered, an OTP has been sent to it"
+      },
+     
+      "RESET_PASSWORD": {
+         "SUCCESS": "Password has been reset successfully"
+      },
+      "RESET_TOKEN_INVALID": "Reset token is invalid or expired",
+      "REFRESH_TOKEN": {
+         "SUCCESS": "Token refreshed successfully"
+      },
+      "REFRESH_TOKEN_INVALID": "Refresh token is invalid",
+      "REFRESH_TOKEN_EXPIRED": "Refresh token has expired, please login again"
+   },
+   "USER": {
+      "NOT_EXIST": "User does not exist",
+      "ALREADY_REGISTER": "This email is already registered",
+      "INVALID_CREDENTIALS": "Invalid credentials",
+      "IN_ACTIVE": "Your account is inactive, please contact administrator",
+       "OTP": {
+         "VERIFIED": "OTP verified successfully",
+         "INVALID": "Invalid OTP",
+         "EXPIRED": "OTP has expired, please request a new one",
+         "ATTEMPTS_EXCEEDED": "Too many wrong attempts, please request a new OTP"
+      },
+      "CREATE": {
+         "SUCCESS": "User created successfully"
+      },
+      "LOGIN": {
+         "SUCCESS": "Login successful"
+      },
+      "LIST": {
+         "SUCCESS": "User list retrieved successfully"
+      },
+      "DETAIL": {
+         "SUCCESS": "User detail retrieved successfully"
+      },
+      "UPDATE": {
+         "SUCCESS": "User updated successfully"
+      },
+      "DELETE": {
+         "SUCCESS": "User deleted successfully"
+      }
+   },
+   "CATEGORY":{
+      "CREATE": {
+         "SUCCESS": "Category created successfully"
+      },
+      "DETAIL": {
+         "SUCCESS": "Category detail retrieved successfully"
+      },
+      "UPDATE": {
+         "SUCCESS": "Category updated successfully"
+      },
+      "DELETE": {
+         "SUCCESS": "Category deleted successfully"
+      },
+      "NOT_EXIST": "Category does not exist",
+      "ALREADY_CREATED": "Category already exists"
+   },
+   "IMAGE":{
+      "EXTENTION":"Only JPG, JPEG, PNG, WEBP and AVIF images are allowed",
+      "INVALID": "Invalid uploaded image"
+   }
+}
