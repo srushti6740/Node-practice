@@ -43,6 +43,7 @@
          "EXPIRED": "OTP has expired, please request a new one",
          "ATTEMPTS_EXCEEDED": "Too many wrong attempts, please request a new OTP"
       },
+   
       "CREATE": {
          "SUCCESS": "User created successfully"
       },
@@ -68,6 +69,9 @@
       },
       "DETAIL": {
          "SUCCESS": "Category detail retrieved successfully"
+      },
+      "LIST": {
+         "SUCCESS": "Category list retrieved successfully"
       },
       "UPDATE": {
          "SUCCESS": "Category updated successfully"

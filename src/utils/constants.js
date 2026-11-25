@@ -40,7 +40,7 @@ const MAX_OTP_ATTEMPTS = 5;
 const RESET_TOKEN_EXPIRES = '15m';
 const TOKEN_TYPE = { REFRESH: 'refresh', RESET: 'reset' };
 
-const BASE_URL = 'localhost:8181';
+const BASE_URL = 'http://localhost:8181';
 const IMGPATH = 'uploads/categories';
 
 module.exports = {

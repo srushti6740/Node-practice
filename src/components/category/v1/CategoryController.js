@@ -2,8 +2,16 @@ const STATUS_CODES = require('http-status-codes');
 const CustomError = require('../../../utils/customError');
 const ServiceError = require('../../../utils/serviceError');
 const { logger } = require('../../../utils/logger');
+const mongoose = require('mongoose');
 
-const { createResponse, handleHTTPError } = require('../../../utils/helper');
+const {
+   createResponse,
+   handleHTTPError,
+   getPageNumber,
+   getRecordsPerPage,
+   getSortOrder,
+   getSortBy
+} = require('../../../utils/helper');
 const categoryService = require('./CategoryService');
 
 class Controller {
@@ -57,7 +65,11 @@ class Controller {
       try {
          let category;
          try {
-            category = await categoryService.updateCategory({ id: req.user._id, data: req.body });
+            category = await categoryService.updateCategory({
+               id: String(req.query.id),
+               data: req.body,
+               file: req.files?.image
+            });
          } catch (error) {
             if (!(error instanceof ServiceError)) {
                throw error;
@@ -107,6 +119,33 @@ class Controller {
          });
       } catch (error) {
          logger.error(__filename, 'categoryDetail', req.custom.uuid, 'Error during get category detail', error);
+         handleHTTPError({ error, res });
+      }
+   }
+
+   static async getCategoryList(req, res) {
+      try {
+         const pageNumber = getPageNumber(req);
+         const recordsPerPage = getRecordsPerPage(req);
+         const sortOrder = getSortOrder(req);
+
+         const { category, total, sortField } = await categoryService.getCategoryList({
+            filters: req.query,
+            sortBy: getSortBy(req),
+            sortOrder,
+            pageNumber,
+            recordsPerPage
+         });
+
+         return createResponse({
+            res,
+            status: STATUS_CODES.OK,
+            message: req.__('CATEGORY.LIST.SUCCESS'),
+            payload: { category },
+            pager: { sortField, sortOrder, pageNumber, recordsPerPage, totalRecords: total }
+         });
+      } catch (error) {
+         logger.error(__filename, 'getCategoryList', req.custom.uuid, 'Error during get category list', error);
          handleHTTPError({ error, res });
       }
    }

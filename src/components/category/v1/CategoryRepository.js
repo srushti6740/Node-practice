@@ -9,6 +9,14 @@ class CategoryRepository {
       return categoryModel.findOne({ name: String(name).trim() });
    }
 
+   findByNameExceptId(name, id) {
+      return categoryModel.findOne({
+         name: String(name).trim(),
+         _id: { $ne: id },
+         deletedAt: null
+      });
+   }
+
    findById(id) {
       return categoryModel.findOne({ _id: id, deletedAt: null });
    }
@@ -17,10 +25,21 @@ class CategoryRepository {
       return categoryModel.create(data);
    }
 
-   findAll() { 
-      return categoryModel.find({
-         deletedAt: null
-      });
+   findSubCategories(mainCategoryId) {
+      return categoryModel
+         .find({
+            main_category_id: mainCategoryId,
+            deletedAt: null
+         })
+         .select('-createdAt -updatedAt -__v');
+   }
+
+   async findAll({ condition, orderBy, skip, limit }) {
+      const [rows, total] = await Promise.all([
+         categoryModel.find(condition).sort(orderBy).skip(skip).limit(limit),
+         categoryModel.countDocuments(condition)
+      ]);
+      return { rows, total };
    }
 
    updateById(id, update) {

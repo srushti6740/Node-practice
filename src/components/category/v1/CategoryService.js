@@ -4,8 +4,7 @@ const categoryRepository = require('./CategoryRepository');
 const ServiceError = require('../../../utils/serviceError');
 const path = require('path');
 const CustomError = require('../../../utils/customError');
-const { STATUS_CODES } = require('http');
-const { BASE_URL, IMGPATH } = require('../../../utils/constants');
+const { uploadImage } = require('../../../utils/fileUpload');
 
 class CategoryService {
    async createCategory({ name, description, image, main_category_id }) {
@@ -25,38 +24,9 @@ class CategoryService {
          }
       }
 
-      let imageName = null;
-      let imageUrl = null;
+      const uploadDir = path.join(process.cwd(), 'uploads', 'categories');
 
-      if (image) {
-         // Check uploaded file
-         if (!image.name || !image.mv) {
-            throw new CustomError(['IMAGE.INVALID'], STATUS_CODES.NOT_FOUND);
-         }
-
-         // Allowed extensions
-         const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
-
-         const extension = path.extname(image.name).toLowerCase();
-
-         if (!allowedExtensions.includes(extension)) {
-            throw new CustomError(['IMAGE.EXTENTION'], STATUS_CODES.NOT_FOUND);
-         }
-
-         const uploadDir = path.join(process.cwd(), 'uploads', 'categories');
-
-         if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-         }
-
-         imageName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
-
-         const uploadPath = path.join(uploadDir, imageName);
-
-         await image.mv(uploadPath);
-
-         imageUrl = `${BASE_URL}/${IMGPATH}/${imageName}`;
-      }
+      const imageUrl = image ? await uploadImage(image, uploadDir) : null;
 
       const category = await categoryRepository.create({
          name,
@@ -71,35 +41,93 @@ class CategoryService {
       };
    }
 
-   async updateCategory({ id, data }) {
+   async updateCategory({ id, data, file }) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+         throw new ServiceError('DATA_NOT_EXIST');
+      }
+
+      const existCategory = await categoryRepository.findById(id);
+      if (!existCategory) {
+         throw new ServiceError('DATA_NOT_EXIST');
+      }
       const update = {};
-      ['name', 'description', 'main_category_id', 'image'].forEach((key) => {
-         if (data[key] !== undefined) update[key] = data[key];
-      });
 
       if (data.name !== undefined) {
-         if (await categoryRepository.emailTaken(data.name, id)) {
+         const name = String(data.name).trim();
+         const exists = await categoryRepository.findByNameExceptId(name, id);
+
+         if (exists) {
             throw new ServiceError('NAME_ALREADY_EXISTS');
          }
-         update.name = data.name;
+         update.name = name;
+      }
+      if (data.description !== undefined) {
+         update.description = data.description;
+      }
+      if (data.main_category_id !== undefined) {
+         update.main_category_id = data.main_category_id === '' ? null : data.main_category_id;
+      }
+      if (data.image !== undefined) {
+         update.image = data.image;
       }
 
       const category = await categoryRepository.updateById(id, update);
       if (!category) {
          throw new ServiceError('DATA_NOT_EXIST');
       }
-      return category;
+
+      const subcategories = await categoryRepository.findSubCategories(category._id);
+      return { ...category, subcategories };
    }
 
    async getCategoryById(id) {
       if (!mongoose.Types.ObjectId.isValid(id)) {
          throw new ServiceError('DATA_NOT_EXIST');
       }
-      const user = await categoryRepository.findById(id);
-      if (!user) {
+      const category = await categoryRepository.findById(id);
+      if (!category) {
          throw new ServiceError('DATA_NOT_EXIST');
       }
-      return user;
+
+      const subcategories = await categoryRepository.findSubCategories(category._id);
+
+      return { ...category.toObject(), subcategories };
+   }
+
+   async getCategoryList({ filters = {}, sortBy, sortOrder, pageNumber, recordsPerPage }) {
+      const SORTABLE_FIELDS = ['createdAt', 'name'];
+      const sortField = SORTABLE_FIELDS.includes(sortBy) ? sortBy : 'createdAt';
+      const orderBy = { [sortField]: String(sortOrder).toLowerCase() === 'asc' ? 1 : -1 };
+
+      const condition = { deletedAt: null };
+
+      condition.main_category_id = null;
+
+      const FILTER_FIELDS = ['name', 'description'];
+      const REGEX_FILTERS = ['name'];
+
+      for (const key of FILTER_FIELDS) {
+         const value = filters[key];
+         if (value === undefined || typeof value !== 'string' || value === '') continue;
+         else if (REGEX_FILTERS.includes(key)) condition[key] = { $regex: escapeRegex(value), $options: 'i' };
+         else condition[key] = value;
+      }
+      const { rows, total } = await categoryRepository.findAll({
+         condition,
+         orderBy,
+         skip: (pageNumber - 1) * recordsPerPage,
+         limit: recordsPerPage
+      });
+      return {
+         category: await Promise.all(
+            rows.map(async (category) => ({
+               ...category.toObject(),
+               subCategories: await categoryRepository.findSubCategories(category._id)
+            }))
+         ),
+         total,
+         sortField
+      };
    }
 }
 

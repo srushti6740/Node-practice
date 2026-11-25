@@ -20,10 +20,10 @@ const userService = require('./UserService');
 class Controller {
    static async createUser(req, res) {
       try {
-         const { first_name, last_name, email, password, phone_code, phone_number } = req.body;
+         const { first_name, last_name, email, password, phone_code, phone_number, role } = req.body;
          let user;
          try {
-            user = await userService.createUser({ first_name, last_name, email, password, phone_code, phone_number });
+            user = await userService.createUser({ first_name, last_name, email, password, phone_code, phone_number, role });
          } catch (error) {
             if (!(error instanceof ServiceError)) {
                throw error;

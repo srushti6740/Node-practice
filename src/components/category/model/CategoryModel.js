@@ -19,7 +19,7 @@ const categorySchema = new Schema(
       },
       main_category_id: {
          type: mongoose.Schema.Types.ObjectId,
-         ref: 'Category',
+         ref: 'category',
          default: null
       },
       deletedAt: {

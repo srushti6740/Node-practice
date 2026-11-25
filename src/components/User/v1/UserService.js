@@ -31,7 +31,7 @@ const withoutPassword = (user, token) => {
  * Business logic for User. Throws ServiceError, the controller maps it to an HTTP error.
  */
 class UserService {
-   async createUser({ first_name, last_name, email, password, phone_code, phone_number }) {
+   async createUser({ first_name, last_name, email, password, phone_code, phone_number, role }) {
       const existEmail = await userRepository.emailTaken(email);
       if (existEmail) {
          throw new ServiceError('EMAIL_ALREADY_EXISTS');
@@ -48,6 +48,7 @@ class UserService {
          password: hashed,
          phone_code,
          phone_number,
+         role,
          otp: otp, // Store plain OTP
          expiresAt: getOtpExpire(OTP_VALID_MINUTES),
          isActive: false
@@ -105,10 +106,7 @@ class UserService {
          await userRepository.markOtpVerified(record._id);
          const resetToken = createJWTTokenWithExpire({ _id: user._id, type: TOKEN_TYPE.RESET }, RESET_TOKEN_EXPIRES);
          return { resetToken };
-      } catch (error) {
-
-         
-      }
+      } catch (error) {}
    }
 
    async login({ email, password }) {
@@ -147,7 +145,7 @@ class UserService {
       }
 
       const { rows, total } = await userRepository.findAll({
-         condition,  
+         condition,
          orderBy,
          skip: (pageNumber - 1) * recordsPerPage,
          limit: recordsPerPage

@@ -4,6 +4,7 @@ const { logger } = require('../utils/logger');
 const CustomError = require('../utils/customError');
 const errorCode = require('../utils/errorCode');
 const userRepository = require('../components/User/v1/UserRepository');
+const { USER_ROLE } = require('../utils/constants');
 
 class Middleware {
    /** Any logged in, active user. Attaches req.user */
@@ -42,6 +43,9 @@ class Middleware {
          }
 
          const user = await userRepository.findById(decoded._id);
+         if (user.role != USER_ROLE.ADMIN) {
+            throw new CustomError(['UNAUTHORIZED'], STATUS_CODES.UNAUTHORIZED);
+         }
          if (!user) {
             throw new CustomError(['USER.NOT_EXIST'], STATUS_CODES.UNAUTHORIZED);
          }
