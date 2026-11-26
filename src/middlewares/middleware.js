@@ -9,7 +9,7 @@ const { USER_ROLE } = require('../utils/constants');
 class Middleware {
    /** Any logged in, active user. Attaches req.user */
    static async isAdminAuthorized(req, res, next) {
-      try {
+      try {   
          const header = req.headers.authorization;
          if (!header || typeof header !== 'string' || !header.startsWith('Bearer ')) {
             return createResponse({

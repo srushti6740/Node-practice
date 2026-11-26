@@ -17,7 +17,9 @@ router.post('/refreshToken', validator.refreshToken, (req, res) => controller.re
 router.get('/detail', [authorizationMiddleware.isUserAuthorized, validator.userDetail], (req, res) =>
    controller.userDetail(req, res)
 );
-router.put('/updateUser', [authorizationMiddleware.isUserAuthorized], (req, res) => controller.updateUser(req, res));
+router.put('/updateUser', [authorizationMiddleware.isUserAuthorized, validator.updateUser], (req, res) =>
+   controller.updateUser(req, res)
+);
 
 // admin only
 router.get('/list', [authorizationMiddleware.isUserAuthorized], (req, res) => controller.getUserList(req, res));

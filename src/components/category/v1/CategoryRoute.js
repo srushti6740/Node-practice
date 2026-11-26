@@ -10,7 +10,7 @@ router.post('/createCategory', [authorizationMiddleware.isAdminAuthorized], vali
    controller.createCategory(req, res)
 );
 
-router.put('/updateCategory', [authorizationMiddleware.isAdminAuthorized], (req, res) =>
+router.put('/updateCategory', [authorizationMiddleware.isAdminAuthorized, validator.updateCategory], (req, res) =>
    controller.updateCategory(req, res)
 );
 
@@ -19,7 +19,6 @@ router.get('/detail', [authorizationMiddleware.isAdminAuthorized, validator.cate
 );
 
 router.get('/list', [authorizationMiddleware.isAdminAuthorized], (req, res) => controller.getCategoryList(req, res));
-
 
 router.delete('/categoryDelete', [authorizationMiddleware.isAdminAuthorized, validator.categoryDetail], (req, res) =>
    controller.categoryDelete(req, res)

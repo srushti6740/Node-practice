@@ -1,5 +1,5 @@
 const { createValidationResponse } = require('../../../utils/helper');
-const { isEmpty, isEmail, isString } = require('../../../utils/validator');
+const { isEmpty, isEmail, isString, isObject } = require('../../../utils/validator');
 
 const finish = (errors, res, next) => {
    if (Object.keys(errors).length > 0) {
@@ -104,6 +104,34 @@ class Validator {
          return createValidationResponse(res, errors);
       }
       next();
+   }
+
+   static updateUser(req, res, next) {
+      const data = req.body;
+      const errors = {};
+      const fields = ['first_name', 'last_name', 'email', 'phone_code', 'phone_number'];
+
+      if (!isObject(data)) {
+         errors.body = req.__('VALIDATIONS.required', 'Update data');
+         return finish(errors, res, next);
+      }
+
+      const providedFields = Object.keys(data).filter((field) => fields.includes(field));
+      if (providedFields.length === 0) {
+         errors.body = req.__('VALIDATIONS.required', 'Update data');
+      }
+
+      fields.forEach((field) => {
+         if (data[field] === undefined) return;
+
+         if (isEmpty(data[field]) || !isString(data[field])) {
+            errors[field] = req.__('VALIDATIONS.invalid', field);
+         } else if (field === 'email' && !isEmail(data[field])) {
+            errors.email = req.__('VALIDATIONS.invalid', 'Email');
+         }
+      });
+
+      finish(errors, res, next);
    }
 }
 

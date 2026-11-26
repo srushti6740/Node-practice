@@ -118,20 +118,16 @@ class CategoryService {
       const condition = { deletedAt: null };
 
       condition.main_category_id = null;
-      const SEARCH_FIELDS = ['name', 'description'];
 
-      for (const key of SEARCH_FIELDS) {
-         const value = filters[key];
-
-         if (typeof value !== 'string' || !value.trim()) {
-            continue;
-         }
-
-         condition[key] = {
-            $regex: escapeRegex(value.trim()),
+      const search = filters.search;
+      if (typeof search === 'string' && search.trim()) {
+         const searchRegex = {
+            $regex: escapeRegex(search.trim()),
             $options: 'i'
          };
+         condition.$or = [{ name: searchRegex }, { description: searchRegex }];
       }
+
       const { fromDate, toDate } = filters;
       if (fromDate || toDate) {
          condition.createdAt = {};
