@@ -1,4 +1,6 @@
 const fs = require('fs');
+const fsPromises = require('fs').promises;
+
 const path = require('path');
 const CustomError = require('./customError');
 const { STATUS_CODES } = require('http');
@@ -8,6 +10,7 @@ const uploadImage = async (image, uploadDir) => {
    if (!image || !image.name || !image.mv) {
       throw new CustomError(['IMAGE.INVALID'], STATUS_CODES.BAD_REQUEST);
    }
+
    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
 
    const extension = path.extname(image.name).toLowerCase();
@@ -29,4 +32,23 @@ const uploadImage = async (image, uploadDir) => {
    return `${BASE_URL}/${IMGPATH}/${imageName}`;
 };
 
-module.exports = { uploadImage };
+const deleteImage = async (imageUrl) => {
+   if (!imageUrl) {
+      return;
+   }
+
+   try {
+      await fsPromises.unlink(imageUrl);
+      console.log("🚀 ~ deleteImage ~ imageUrl:", imageUrl)
+ 
+   } catch (error) {
+      if (error.code === 'ENOENT') {
+         console.log('Image does not exist:', imageUrl);
+         return;
+      }
+
+      throw error;
+   }
+};
+
+module.exports = { uploadImage, deleteImage };

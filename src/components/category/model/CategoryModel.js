@@ -30,4 +30,24 @@ const categorySchema = new Schema(
    { timestamps: true }
 );
 
+// pre hook
+categorySchema.pre('find', function (next) {
+   this.where({ deletedAt: null });
+   next();
+});
+categorySchema.pre('findOne', function (next) {
+   this.where({ deletedAt: null });
+   next();
+});
+categorySchema.pre('findOneAndUpdate', function (next) {
+   this.where({ deletedAt: null });
+   next();
+});
+
+// Short Cut
+// categorySchema.pre(/^find/, function (next) {
+//    this.where({ deletedAt: null });
+//    next();
+// });
+
 module.exports = mongoose.model('category', categorySchema);

@@ -149,5 +149,31 @@ class Controller {
          handleHTTPError({ error, res });
       }
    }
+
+   static async categoryDelete(req, res) {
+      try {
+         try {
+            await categoryService.deleteCategory(String(req.query.id));
+         } catch (error) {
+            if (!(error instanceof ServiceError)) {
+               throw error;
+            }
+            switch (error.error) {
+               case 'DATA_NOT_EXIST':
+                  throw new CustomError(['CATEGORY.NOT_EXIST'], STATUS_CODES.NOT_FOUND);
+               default:
+                  throw error;
+            }
+         }
+         return createResponse({
+            res,
+            status: STATUS_CODES.OK,
+            message: req.__('CATEGORY.DELETE.SUCCESS')
+         });
+      } catch (error) {
+         logger.error(__filename, 'categoryDelete', req.custom.uuid, 'Error during delete category', error);
+         handleHTTPError({ error, res });
+      }
+   }
 }
 module.exports = Controller;

@@ -35,6 +35,20 @@ const USER_ROLE = {
    USER: 'user'
 };
 
+const TASK_STATUS = {
+   PENDING: 'pending',
+   READY_TO_START: 'ready to start',
+   WORK_IN_PROGRESS: 'work in progress',
+   REVIEW: 'review',
+   APPROVED: 'approved'
+};
+
+const PRIORITE = {
+   LOW: 'low',
+   MEDIUM: 'medium',
+   HIGH: 'high'
+};
+
 const OTP_VALID_MINUTES = 10;
 const MAX_OTP_ATTEMPTS = 5;
 const RESET_TOKEN_EXPIRES = '15m';
@@ -52,6 +66,8 @@ module.exports = {
    ROUTE_URL,
    REGEXP,
    USER_ROLE,
+   TASK_STATUS,
+   PRIORITE,
    OTP_VALID_MINUTES,
    MAX_OTP_ATTEMPTS,
    RESET_TOKEN_EXPIRES,

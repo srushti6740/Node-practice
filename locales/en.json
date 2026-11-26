@@ -84,6 +84,8 @@
    },
    "IMAGE":{
       "EXTENTION":"Only JPG, JPEG, PNG, WEBP and AVIF images are allowed",
-      "INVALID": "Invalid uploaded image"
+      "INVALID": "Invalid uploaded image",
+      "NOTFOUND": "Image Not Found",
+      "URL_REQUIRED": "Image URL is required"
    }
 }

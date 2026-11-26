@@ -4,7 +4,8 @@ const categoryRepository = require('./CategoryRepository');
 const ServiceError = require('../../../utils/serviceError');
 const path = require('path');
 const CustomError = require('../../../utils/customError');
-const { uploadImage } = require('../../../utils/fileUpload');
+const { uploadImage, deleteImage } = require('../../../utils/fileUpload');
+const { escapeRegex } = require('../../../utils/helper');
 
 class CategoryService {
    async createCategory({ name, description, image, main_category_id }) {
@@ -67,13 +68,28 @@ class CategoryService {
       if (data.main_category_id !== undefined) {
          update.main_category_id = data.main_category_id === '' ? null : data.main_category_id;
       }
-      if (data.image !== undefined) {
-         update.image = data.image;
+
+      if (file) {
+         const uploadDir = path.join(process.cwd(), 'uploads', 'categories');
+
+         const imageUrl = await uploadImage(file, uploadDir);
+
+         update.image = imageUrl;
       }
 
       const category = await categoryRepository.updateById(id, update);
       if (!category) {
          throw new ServiceError('DATA_NOT_EXIST');
+      }
+
+      if (file && existCategory.image) {
+         const oldImagePath = path.join(
+            process.cwd(),
+            'uploads',
+            'categories',
+            path.basename(new URL(existCategory.image).pathname)
+         );
+         await deleteImage(oldImagePath);
       }
 
       const subcategories = await categoryRepository.findSubCategories(category._id);
@@ -102,16 +118,45 @@ class CategoryService {
       const condition = { deletedAt: null };
 
       condition.main_category_id = null;
+      const SEARCH_FIELDS = ['name', 'description'];
 
-      const FILTER_FIELDS = ['name', 'description'];
-      const REGEX_FILTERS = ['name'];
-
-      for (const key of FILTER_FIELDS) {
+      for (const key of SEARCH_FIELDS) {
          const value = filters[key];
-         if (value === undefined || typeof value !== 'string' || value === '') continue;
-         else if (REGEX_FILTERS.includes(key)) condition[key] = { $regex: escapeRegex(value), $options: 'i' };
-         else condition[key] = value;
+
+         if (typeof value !== 'string' || !value.trim()) {
+            continue;
+         }
+
+         condition[key] = {
+            $regex: escapeRegex(value.trim()),
+            $options: 'i'
+         };
       }
+      const { fromDate, toDate } = filters;
+      if (fromDate || toDate) {
+         condition.createdAt = {};
+         if (fromDate) {
+            const startDate = new Date(`${fromDate}T00:00:00.000Z`);
+            if (Number.isNaN(startDate.getTime())) {
+               throw new ServiceError('INVALID_DATE');
+            }
+
+            condition.createdAt.$gte = startDate;
+         }
+         if (toDate) {
+            const endDate = new Date(`${endDate}T00:00:00.000Z`);
+            if (Number.isNaN(endDate.getTime())) {
+               throw new ServiceError('INVALID_DATE');
+            }
+
+            endDate.setUTCDate(endDate.getUTCDate() + 1);
+            condition.createdAt.$lt = endDate;
+         }
+         if (fromDate && toDate && fromDate > toDate) {
+            throw new ServiceError('INVALID_DATE');
+         }
+      }
+
       const { rows, total } = await categoryRepository.findAll({
          condition,
          orderBy,
@@ -128,6 +173,42 @@ class CategoryService {
          total,
          sortField
       };
+   }
+
+   async deleteCategory(id) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+         throw new ServiceError('DATA_NOT_EXIST');
+      }
+
+      const category = await categoryRepository.findById(id);
+
+      if (!category) {
+         throw new ServiceError('DATA_NOT_EXIST');
+      }
+
+      const uploadDir = path.join(process.cwd(), 'uploads', 'categories');
+
+      const subcategories = !category.main_category_id ? await categoryRepository.findSubCategories(category._id) : [];
+
+      if (!category.main_category_id) {
+         await categoryRepository.softDeleteSubCategories(category._id);
+      }
+
+      // Soft delete
+      const deleteCategory = await categoryRepository.softDelete(id);
+
+      if (!deleteCategory) {
+         throw new ServiceError('DATA_NOT_EXIST');
+      }
+      const categoriesToDelete = [category, ...subcategories];
+
+      const imagePath = categoriesToDelete
+         .filter((item) => item.image)
+         .map((item) => path.join(uploadDir, path.basename(item.image.split('?')[0])));
+
+      await Promise.all(imagePath.map((imagePath) => deleteImage(imagePath)));
+
+      return true;
    }
 }
 

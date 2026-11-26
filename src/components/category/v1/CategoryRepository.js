@@ -54,6 +54,19 @@ class CategoryRepository {
          { new: true }
       );
    }
+
+   // soft delete subcategories
+   softDeleteSubCategories(mainCategoryId) {
+      return categoryModel.updateMany(
+         {
+            main_category_id: mainCategoryId,
+            deletedAt: null
+         },
+         {
+            $set: { deletedAt: new Date() }
+         }
+      );
+   }
 }
 
 module.exports = new CategoryRepository();
