@@ -87,5 +87,27 @@
       "INVALID": "Invalid uploaded image",
       "NOTFOUND": "Image Not Found",
       "URL_REQUIRED": "Image URL is required"
+   },
+   "TASK":{
+      "CREATE": {
+         "SUCCESS": "Task created successfully"
+      },
+      "DETAIL": {
+         "SUCCESS": "Task detail retrieved successfully"
+      },
+      "LIST": {
+         "SUCCESS": "Task list retrieved successfully"
+      },
+      "UPDATE": {
+         "SUCCESS": "Task updated successfully"
+      },
+      "DELETE": {
+         "SUCCESS": "Task deleted successfully"
+      },
+      "ASSIGN":{
+  "SUCCESS": "Task assigned successfully"
+      },
+      "NOT_EXIST": "Task does not exist",
+      "ALREADY_CREATED": "Task already exists"
    }
 }

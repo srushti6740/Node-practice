@@ -14,7 +14,7 @@ class CategoryService {
          throw new ServiceError('CATEGORY_ALREADY_EXISTS');
       }
 
-      if (main_category_id) {
+       if (main_category_id) {
          if (!mongoose.Types.ObjectId.isValid(main_category_id)) {
             throw new ServiceError('CATEGORY_NOT_FOUND');
          }

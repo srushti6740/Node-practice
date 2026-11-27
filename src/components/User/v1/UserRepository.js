@@ -96,6 +96,13 @@ class UserRepository {
    softDelete(id) {
       return userModel.findOneAndUpdate({ _id: id, deletedAt: null }, { $set: { deletedAt: new Date() } });
    }
+
+   findByIds(ids) {
+      return userModel.find({
+         _id: { $in: ids },
+         deletedAt: null
+      });
+   }           
 }
 
 module.exports = new UserRepository();

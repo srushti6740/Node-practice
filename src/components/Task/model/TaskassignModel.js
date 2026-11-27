@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const { TASK_STATUS } = require('../../../utils/constants');
 const { Schema } = mongoose;
 
 const taskAssiSchema = new Schema({
@@ -18,8 +18,8 @@ const taskAssiSchema = new Schema({
 
    assignedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true    
+      ref: 'user',
+      required: true
    },
 
    assignedAt: {
@@ -28,4 +28,4 @@ const taskAssiSchema = new Schema({
    }
 });
 
-module.exports = mongoose.Model('taskassi', taskAssiSchema);
+module.exports = mongoose.model('taskassi', taskAssiSchema);

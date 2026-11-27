@@ -18,6 +18,11 @@ const notificationSchema = new Schema(
          type: mongoose.Types.ObjectId,
          ref: 'task'
       },
+      assignment: {
+         type: Schema.Types.ObjectId,
+         ref: 'taskassi',
+         default: null
+      },
       title: {
          type: String,
          required: true
